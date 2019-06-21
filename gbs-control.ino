@@ -1,11 +1,11 @@
 #include <Wire.h>
 #include "ntsc_240p.h"
-#include "pal_240p.h"
+//#include "pal_240p.h"
 #include "ntsc_feedbackclock.h"
-#include "pal_feedbackclock.h"
+//#include "pal_feedbackclock.h"
 #include "ntsc_1280x720.h"
 #include "ntsc_1280x1024.h"
-#include "pal_1280x720.h"
+//#include "pal_1280x720.h"
 #include "presetMdSection.h"
 
 #include "tv5725.h"
@@ -73,10 +73,10 @@ Pinger pinger; // pinger global object to aid debugging WiFi issues
 #define digitalRead(x) fastRead<x>()
 
 //#define HAVE_BUTTONS
-#define INPUT_PIN 9
-#define DOWN_PIN 8
-#define UP_PIN 7
-#define MENU_PIN 6
+//#define INPUT_PIN 9
+//#define DOWN_PIN 8
+//#define UP_PIN 7
+//#define MENU_PIN 6
 
 #endif
 
@@ -157,7 +157,7 @@ char globalCommand;
 
 #if defined(ESP8266)
 // serial mirror class for websocket logs
-class SerialMirror : public Stream {
+class //SerialMirror : public Stream {
   size_t write(const uint8_t *data, size_t size) {
 #if defined(ESP8266)
     //if (rto->webSocketConnected) {
@@ -192,9 +192,9 @@ class SerialMirror : public Stream {
   void flush() {       }
 };
 
-SerialMirror SerialM;
+//SerialMirror //SerialM;
 #else
-#define SerialM Serial
+//#define //SerialM Serial
 #endif
 
 static uint8_t lastSegment = 0xFF;
@@ -351,7 +351,7 @@ void writeProgramArrayNew(const uint8_t* programArray)
 }
 
 void setResetParameters() {
-  SerialM.println("<reset>");
+  //SerialM.println("<reset>");
   rto->videoStandardInput = 0;
   //rto->clampWasTurnedOff = 1;
   rto->deinterlacerWasTurnedOff = false;
@@ -519,7 +519,7 @@ void setSpParameters() {
 void setAndUpdateSogLevel(uint8_t level) {
   GBS::ADC_SOGCTRL::write(level);
   rto->currentLevelSOG = level;
-  //SerialM.print("sog level: "); SerialM.println(rto->currentLevelSOG);
+  ////SerialM.print("sog level: "); //SerialM.println(rto->currentLevelSOG);
 }
 
 // in operation: t5t04t1 for 10% lower power on ADC
@@ -534,7 +534,7 @@ void setAndUpdateSogLevel(uint8_t level) {
 // Generally, the ADC has to stay enabled to perform SOG separation and thus "see" a source.
 // It is possible to run in low power mode.
 void goLowPowerWithInputDetection() {
-  SerialM.println("low power");
+  //SerialM.println("low power");
   setSpParameters();
   loadPresetMdSection(); // fills 1_60 to 1_83 (mode detect segment, mostly static)
   setAndUpdateSogLevel(rto->currentLevelSOG);
@@ -582,7 +582,7 @@ void optimizePhaseSP() {
     rto->phaseSP &= 0x1f;
     lastResult = result;
   }
-  SerialM.print("phaseSP: "); SerialM.println(idealPhase);
+  //SerialM.print("phaseSP: "); //SerialM.println(idealPhase);
 
   GBS::PLLAD_BPS::write(0);
   GBS::PA_SP_LOCKOFF::write(0);
@@ -619,7 +619,7 @@ void optimizeSogLevel() {
       }
     }
     if (jitter >= 10) { break; } // found
-    SerialM.print("+");
+    //SerialM.print("+");
     setAndUpdateSogLevel(rto->currentLevelSOG);
     delay(10);
     if (rto->currentLevelSOG >= 1) rto->currentLevelSOG -= 1;
@@ -631,7 +631,7 @@ void optimizeSogLevel() {
   if (rto->currentLevelSOG < 31 && rto->currentLevelSOG > 16) { rto->currentLevelSOG = 9; }
   else if (rto->currentLevelSOG >= 12) { rto->currentLevelSOG -= 7; }
   else if (rto->currentLevelSOG >= 3) { rto->currentLevelSOG -= 2; }
-  SerialM.print("\nsog level: "); SerialM.println(rto->currentLevelSOG);
+  //SerialM.print("\nsog level: "); //SerialM.println(rto->currentLevelSOG);
   setAndUpdateSogLevel(rto->currentLevelSOG);
 
   GBS::TEST_BUS_SP_SEL::write(debugRegSp);
@@ -667,7 +667,7 @@ uint8_t detectAndSwitchToActiveInput() { // if any
         delay(1); // wifi stack
       }
       if (vsyncActive) {
-        SerialM.println("RGBHV");
+        //SerialM.println("RGBHV");
         rto->inputIsYpBpR = 0;
         rto->sourceDisconnected = false;
         applyRGBPatches();
@@ -693,10 +693,10 @@ uint8_t detectAndSwitchToActiveInput() { // if any
     readout = GBS::TEST_BUS_2F::read();
     uint8_t videoMode = getVideoMode();
     if (readout != 0 || videoMode > 0) {
-      SerialM.print("found: "); SerialM.print(readout); SerialM.print(" getVideoMode: "); SerialM.print(getVideoMode());
-      SerialM.print(" input: "); SerialM.print(currentInput);
+      //SerialM.print("found: "); //SerialM.print(readout); //SerialM.print(" getVideoMode: "); //SerialM.print(getVideoMode());
+      //SerialM.print(" input: "); //SerialM.print(currentInput);
       if (currentInput == 1) { // RGBS
-        SerialM.println(" RGBS");
+        //SerialM.println(" RGBS");
         resetPLLAD();
         unsigned long timeOutStart = millis();
         unsigned long now = millis();
@@ -708,7 +708,7 @@ uint8_t detectAndSwitchToActiveInput() { // if any
           else { now = millis(); }
         }
         if (millis() - timeOutStart >= 1000) {
-          SerialM.print("\n");
+          //SerialM.print("\n");
           return 0;
         }
         rto->inputIsYpBpR = 0;
@@ -717,11 +717,11 @@ uint8_t detectAndSwitchToActiveInput() { // if any
         return 1;
       }
       else if (currentInput == 0) { // YUV
-        SerialM.println(" YUV");
+        //SerialM.println(" YUV");
         resetPLLAD();
         rto->inputIsYpBpR = 1;
         rto->sourceDisconnected = false;
-        //if (GBS::SP_NO_CLAMP_REG::read() == 0) { SerialM.println("!!A"); } // assert: must be 1
+        //if (GBS::SP_NO_CLAMP_REG::read() == 0) { //SerialM.println("!!A"); } // assert: must be 1
         LEDON;
         unsigned long timeOutStart = millis();
         unsigned long now = millis();
@@ -750,7 +750,7 @@ void inputAndSyncDetect() {
   uint8_t syncFound = detectAndSwitchToActiveInput();
 
   if (syncFound == 0) {
-    SerialM.println("no sync found");
+    //SerialM.println("no sync found");
     if (!getSyncPresent()) {
       rto->sourceDisconnected = true;
       rto->videoStandardInput = 0;
@@ -789,9 +789,9 @@ void printReg(uint8_t seg, uint8_t reg) {
   uint8_t readout;
   readFromRegister(reg, 1, &readout);
   // didn't think this HEX trick would work, but it does! (?)
-  SerialM.print("0x"); SerialM.print(readout, HEX); SerialM.print(", // s"); SerialM.print(seg); SerialM.print("_"); SerialM.println(reg, HEX);
+  //SerialM.print("0x"); //SerialM.print(readout, HEX); //SerialM.print(", // s"); //SerialM.print(seg); //SerialM.print("_"); //SerialM.println(reg, HEX);
   // old:
-  //SerialM.print(readout); SerialM.print(", // s"); SerialM.print(seg); SerialM.print("_"); SerialM.println(reg, HEX);
+  ////SerialM.print(readout); //SerialM.print(", // s"); //SerialM.print(seg); //SerialM.print("_"); //SerialM.println(reg, HEX);
 }
 
 // dumps the current chip configuration in a format that's ready to use as new preset :)
@@ -984,14 +984,14 @@ void shiftHorizontalLeftIF(uint8_t amount) {
   else {
     GBS::IF_HB_ST2::write(IF_HB_ST2 - IF_HSYNC_RST);
   }
-  //SerialM.print("IF_HB_ST2:  "); SerialM.println(GBS::IF_HB_ST2::read());
+  ////SerialM.print("IF_HB_ST2:  "); //SerialM.println(GBS::IF_HB_ST2::read());
 
   // stop
   if (IF_HB_SP2 < IF_HSYNC_RST) GBS::IF_HB_SP2::write(IF_HB_SP2);
   else {
     GBS::IF_HB_SP2::write((IF_HB_SP2 - IF_HSYNC_RST) + 1);
   }
-  //SerialM.print("IF_HB_SP2:  "); SerialM.println(GBS::IF_HB_SP2::read());
+  ////SerialM.print("IF_HB_SP2:  "); //SerialM.println(GBS::IF_HB_SP2::read());
 }
 
 void shiftHorizontalRightIF(uint8_t amount) {
@@ -1011,14 +1011,14 @@ void shiftHorizontalRightIF(uint8_t amount) {
   else {
     GBS::IF_HB_ST2::write(IF_HSYNC_RST - 1);
   }
-  //SerialM.print("IF_HB_ST2:  "); SerialM.println(GBS::IF_HB_ST2::read());
+  ////SerialM.print("IF_HB_ST2:  "); //SerialM.println(GBS::IF_HB_ST2::read());
 
   if (IF_HB_SP2 > 0) GBS::IF_HB_SP2::write(IF_HB_SP2);
   else {
     GBS::IF_HB_SP2::write(IF_HSYNC_RST - 1);
     //GBS::IF_LINE_SP::write(GBS::IF_LINE_SP::read() - 2);
   }
-  //SerialM.print("IF_HB_SP2:  "); SerialM.println(GBS::IF_HB_SP2::read());
+  ////SerialM.print("IF_HB_SP2:  "); //SerialM.println(GBS::IF_HB_SP2::read());
 }
 
 void scaleHorizontal(uint16_t amountToAdd, bool subtracting) {
@@ -1031,7 +1031,7 @@ void scaleHorizontal(uint16_t amountToAdd, bool subtracting) {
     hscale += amountToAdd;
   }
 
-  SerialM.print("Scale Hor: "); SerialM.println(hscale);
+  //SerialM.print("Scale Hor: "); //SerialM.println(hscale);
   GBS::VDS_HSCALE::write(hscale);
 }
 
@@ -1063,8 +1063,8 @@ void moveHS(uint16_t amountToAdd, bool subtracting) {
     newST += amountToAdd;
     newSP += amountToAdd;
   }
-  //SerialM.print("HSST: "); SerialM.print(newST);
-  //SerialM.print(" HSSP: "); SerialM.println(newSP);
+  ////SerialM.print("HSST: "); //SerialM.print(newST);
+  ////SerialM.print(" HSSP: "); //SerialM.println(newSP);
 
   writeOneByte(0x0a, (uint8_t)(newST & 0x00ff));
   writeOneByte(0x0b, ((uint8_t)(newSP & 0x000f) << 4) | ((uint8_t)((newST & 0x0f00) >> 8)));
@@ -1082,17 +1082,17 @@ void moveVS(uint16_t amountToAdd, bool subtracting) {
       newVDS_VS_ST -= amountToAdd;
       newVDS_VS_SP -= amountToAdd;
     }
-    else SerialM.println("limit");
+//    else //SerialM.println("limit");
   }
   else {
     if ((newVDS_VS_SP + amountToAdd) < vtotal) {
       newVDS_VS_ST += amountToAdd;
       newVDS_VS_SP += amountToAdd;
     }
-    else SerialM.println("limit");
+//    else //SerialM.println("limit");
   }
-  //SerialM.print("VSST: "); SerialM.print(newVDS_VS_ST);
-  //SerialM.print(" VSSP: "); SerialM.println(newVDS_VS_SP);
+  ////SerialM.print("VSST: "); //SerialM.print(newVDS_VS_ST);
+  ////SerialM.print(" VSSP: "); //SerialM.println(newVDS_VS_SP);
 
   GBS::VDS_VS_ST::write(newVDS_VS_ST);
   GBS::VDS_VS_SP::write(newVDS_VS_SP);
@@ -1150,7 +1150,7 @@ void scaleVertical(uint16_t amountToAdd, bool subtracting) {
     vscale += amountToAdd;
   }
 
-  SerialM.print("Scale Vert: "); SerialM.println(vscale);
+  //SerialM.print("Scale Vert: "); //SerialM.println(vscale);
   GBS::VDS_VSCALE::write(vscale);
 }
 
@@ -1189,7 +1189,7 @@ void shiftVertical(uint16_t amountToAdd, bool subtracting) {
   }
 
   Regs::write(newVbst, newVbsp);
-  //SerialM.print("VSST: "); SerialM.print(newVbst); SerialM.print(" VSSP: "); SerialM.println(newVbsp);
+  ////SerialM.print("VSST: "); //SerialM.print(newVbst); //SerialM.print(" VSSP: "); //SerialM.println(newVbsp);
 }
 
 void shiftVerticalUp() {
@@ -1281,7 +1281,7 @@ void setDisplayVblankStopPosition(uint16_t value) {
 void getVideoTimings() {
   SerialM.println("");
   // get HRST
-  SerialM.print("htotal: "); SerialM.println(GBS::VDS_HSYNC_RST::read());
+  //SerialM.print("htotal: "); //SerialM.println(GBS::VDS_HSYNC_RST::read());
   // get HS_ST
   SerialM.print("HS ST/SP     : "); SerialM.print(GBS::VDS_HS_ST::read());
   SerialM.print(" "); SerialM.println(GBS::VDS_HS_SP::read());
@@ -1293,7 +1293,7 @@ void getVideoTimings() {
   SerialM.print(" "); SerialM.println(GBS::VDS_HB_SP::read());
   SerialM.println("----");
   // get VRST
-  SerialM.print("vtotal: "); SerialM.println(GBS::VDS_VSYNC_RST::read());
+  //SerialM.print("vtotal: "); //SerialM.println(GBS::VDS_VSYNC_RST::read());
   // get V Sync Start
   SerialM.print("VS ST/SP     : "); SerialM.print(GBS::VDS_VS_ST::read());
   SerialM.print(" "); SerialM.println(GBS::VDS_VS_SP::read());
@@ -1402,7 +1402,7 @@ void applyBestHTotal(uint16_t bestHTotal) {
       // probably better to hor. zoom instead of memory blank pos change
       h_blank_memory_stop_position = (h_blank_display_stop_position / 2) - (h_blank_display_stop_position / 5);
       if (diffHTotal > 0) h_blank_memory_stop_position = h_blank_display_stop_position + (h_blank_display_stop_position / 6);
-      SerialM.println("large diff!");
+      //SerialM.println("large diff!");
     }
 
     if (requiresScalingCorrection) {
@@ -1428,10 +1428,10 @@ void applyBestHTotal(uint16_t bestHTotal) {
     // IF 1_1a to minimum
     //GBS::IF_HB_SP2::write(0x08);
   }
-  SerialM.print("Base: "); SerialM.print(orig_htotal);
-  SerialM.print(" Best: "); SerialM.println(bestHTotal);
+  //SerialM.print("Base: "); //SerialM.print(orig_htotal);
+  //SerialM.print(" Best: "); //SerialM.println(bestHTotal);
   // todo: websocket breaks on this if diffHTotal is negative
-  //SerialM.print(" Diff: "); SerialM.println(diffHTotal);
+  ////SerialM.print(" Diff: "); //SerialM.println(diffHTotal);
 }
 
 void doPostPresetLoadSteps() {
@@ -1600,7 +1600,7 @@ void doPostPresetLoadSteps() {
   GBS::INTERRUPT_CONTROL_00::write(0xff); // reset irq status
   GBS::INTERRUPT_CONTROL_00::write(0x00);
   GBS::PAD_SYNC_OUT_ENZ::write(0); // output sync > display goes on
-  SerialM.println("post preset done");
+//  SerialM.println("post preset done");
   //rto->clampWasTurnedOff = 1; // make sure syncwatcher enables clamp
   rto->applyPresetDoneStage = 1;
   rto->applyPresetDoneTime = millis();
@@ -1608,7 +1608,7 @@ void doPostPresetLoadSteps() {
 
 void applyPresets(uint8_t result) {
   if (result == 1) {
-    SerialM.println("60Hz ");
+    //SerialM.println("60Hz ");
     if (uopt->presetPreference == 0) {
       writeProgramArrayNew(ntsc_240p);
     }
@@ -1620,7 +1620,7 @@ void applyPresets(uint8_t result) {
     }
 #if defined(ESP8266)
     else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
+      //SerialM.println("(custom)");
       const uint8_t* preset = loadPresetFromSPIFFS(result);
       writeProgramArrayNew(preset);
     }
@@ -1629,30 +1629,30 @@ void applyPresets(uint8_t result) {
     }
 #endif
   }
-  else if (result == 2) {
-    SerialM.println("50Hz ");
-    if (uopt->presetPreference == 0) {
-      writeProgramArrayNew(pal_240p);
-    }
-    else if (uopt->presetPreference == 1) {
-      writeProgramArrayNew(pal_feedbackclock);
-    }
-    else if (uopt->presetPreference == 3) {
-      writeProgramArrayNew(pal_1280x720);
-    }
-#if defined(ESP8266)
-    else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
-      const uint8_t* preset = loadPresetFromSPIFFS(result);
-      writeProgramArrayNew(preset);
-    }
-    else if (uopt->presetPreference == 4) {
-      writeProgramArrayNew(pal_240p);
-    }
-#endif
-  }
+//  else if (result == 2) {
+//    //SerialM.println("50Hz ");
+//    if (uopt->presetPreference == 0) {
+//      writeProgramArrayNew(pal_240p);
+//    }
+//    else if (uopt->presetPreference == 1) {
+//      writeProgramArrayNew(pal_feedbackclock);
+//    }
+//    else if (uopt->presetPreference == 3) {
+//      writeProgramArrayNew(pal_1280x720);
+//    }
+//#if defined(ESP8266)
+//    else if (uopt->presetPreference == 2) {
+//      //SerialM.println("(custom)");
+//      const uint8_t* preset = loadPresetFromSPIFFS(result);
+//      writeProgramArrayNew(preset);
+//    }
+//    else if (uopt->presetPreference == 4) {
+//      writeProgramArrayNew(pal_240p);
+//    }
+//#endif
+//  }
   else if (result == 3) {
-    SerialM.println("60Hz EDTV ");
+    //SerialM.println("60Hz EDTV ");
     // ntsc base
     if (uopt->presetPreference == 0) {
       writeProgramArrayNew(ntsc_240p);
@@ -1667,7 +1667,7 @@ void applyPresets(uint8_t result) {
     }
 #if defined(ESP8266)
     else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
+      //SerialM.println("(custom)");
       const uint8_t* preset = loadPresetFromSPIFFS(result);
       writeProgramArrayNew(preset);
     }
@@ -1677,33 +1677,33 @@ void applyPresets(uint8_t result) {
     }
 #endif
   }
-  else if (result == 4) {
-    SerialM.println("50Hz EDTV ");
-    // pal base
-    if (uopt->presetPreference == 0) {
-      writeProgramArrayNew(pal_240p);
-    }
-    else if (uopt->presetPreference == 1) {
-      //writeProgramArrayNew(pal_feedbackclock); // not supported atm
-      writeProgramArrayNew(pal_240p);
-    }
-    else if (uopt->presetPreference == 3) {
-      //writeProgramArrayNew(pal_1280x720); // not supported atm
-      writeProgramArrayNew(pal_240p);
-    }
-#if defined(ESP8266)
-    else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
-      const uint8_t* preset = loadPresetFromSPIFFS(result);
-      writeProgramArrayNew(preset);
-    }
-    else if (uopt->presetPreference == 4) {
-      writeProgramArrayNew(pal_240p);
-    }
-#endif
-  }
+//  else if (result == 4) {
+//    //SerialM.println("50Hz EDTV ");
+//    // pal base
+//    if (uopt->presetPreference == 0) {
+//      writeProgramArrayNew(pal_240p);
+//    }
+//    else if (uopt->presetPreference == 1) {
+//      //writeProgramArrayNew(pal_feedbackclock); // not supported atm
+//      writeProgramArrayNew(pal_240p);
+//    }
+//    else if (uopt->presetPreference == 3) {
+//      //writeProgramArrayNew(pal_1280x720); // not supported atm
+//      writeProgramArrayNew(pal_240p);
+//    }
+//#if defined(ESP8266)
+//    else if (uopt->presetPreference == 2) {
+//      //SerialM.println("(custom)");
+//      const uint8_t* preset = loadPresetFromSPIFFS(result);
+//      writeProgramArrayNew(preset);
+//    }
+//    else if (uopt->presetPreference == 4) {
+//      writeProgramArrayNew(pal_240p);
+//    }
+//#endif
+//  }
   else if (result == 5) {
-    SerialM.println("720p 60Hz HDTV ");
+    //SerialM.println("720p 60Hz HDTV ");
     // use bypass mode for all configs
     rto->outModePassThroughWithIf = 0;
     rto->videoStandardInput = 5;
@@ -1721,7 +1721,7 @@ void applyPresets(uint8_t result) {
     }
 #if defined(ESP8266)
     else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
+      //SerialM.println("(custom)");
       const uint8_t* preset = loadPresetFromSPIFFS(result);
       writeProgramArrayNew(preset);
     }
@@ -1731,7 +1731,7 @@ void applyPresets(uint8_t result) {
 #endif*/
   }
   else if (result == 6) {
-    SerialM.println("1080i 60Hz HDTV ");
+    //SerialM.println("1080i 60Hz HDTV ");
     // use bypass mode for all configs
     rto->outModePassThroughWithIf = 0;
     rto->videoStandardInput = 6;
@@ -1749,7 +1749,7 @@ void applyPresets(uint8_t result) {
     }
 #if defined(ESP8266)
     else if (uopt->presetPreference == 2) {
-      SerialM.println("(custom)");
+      //SerialM.println("(custom)");
       const uint8_t* preset = loadPresetFromSPIFFS(result);
       writeProgramArrayNew(preset);
     }
@@ -1759,12 +1759,12 @@ void applyPresets(uint8_t result) {
 #endif*/
   }
   else if (result == 15) {
-    SerialM.println("RGBHV bypass ");
+    //SerialM.println("RGBHV bypass ");
     writeProgramArrayNew(ntsc_240p);
     bypassModeSwitch_RGBHV();
   }
   else {
-    SerialM.println("Unknown timing! ");
+    //SerialM.println("Unknown timing! ");
     rto->videoStandardInput = 0; // mark as "no sync" for syncwatcher
     inputAndSyncDetect();
     //resetModeDetect();
@@ -1918,8 +1918,8 @@ void updateCoastPosition() {
   if (inHlength > 0) {
       GBS::SP_H_CST_ST::write(inHlength >> 4); // low but not near 0 (typical: 0x6a)
       GBS::SP_H_CST_SP::write(inHlength - 32); //snes minimum: inHlength -12 (only required in 239 mode)
-      SerialM.print("coast start: "); SerialM.println(inHlength >> 4);
-      SerialM.print("coast stop : "); SerialM.println(inHlength - 32);
+//      SerialM.print("coast start: "); SerialM.println(inHlength >> 4);
+//      SerialM.print("coast stop : "); SerialM.println(inHlength - 32);
       GBS::SP_H_PROTECT::write(0);
       GBS::SP_DIS_SUB_COAST::write(0);
       GBS::SP_HCST_AUTO_EN::write(0);
@@ -1942,7 +1942,7 @@ void updateClampPosition() {
 
   uint16_t inHlength = GBS::STATUS_SYNC_PROC_HTOTAL::read();
   if (inHlength < 100 || inHlength > 4095) { 
-      SerialM.println("!!B"); // assert: must be valid
+//      SerialM.println("!!B"); // assert: must be valid
       return;
   }
   GBS::SP_CLP_SRC_SEL::write(0); // 0: 27Mhz clock 1: pixel clock
@@ -1997,10 +1997,10 @@ void updateClampPosition() {
     GBS::SP_CS_CLP_SP::write(stop);
   }
 
-  SerialM.print("clamp start: "); SerialM.print(GBS::SP_CS_CLP_ST::read());
-  SerialM.print(" 0x"); SerialM.println(GBS::SP_CS_CLP_ST::read(), HEX);
-  SerialM.print("clamp stop : "); SerialM.print(GBS::SP_CS_CLP_SP::read());
-  SerialM.print(" 0x"); SerialM.println(GBS::SP_CS_CLP_SP::read(), HEX);
+//  SerialM.print("clamp start: "); SerialM.print(GBS::SP_CS_CLP_ST::read());
+//  SerialM.print(" 0x"); SerialM.println(GBS::SP_CS_CLP_ST::read(), HEX);
+//  SerialM.print("clamp stop : "); SerialM.print(GBS::SP_CS_CLP_SP::read());
+//  SerialM.print(" 0x"); SerialM.println(GBS::SP_CS_CLP_SP::read(), HEX);
 
   GBS::SP_NO_CLAMP_REG::write(0);
   rto->clampPositionIsSet = true;
@@ -2010,18 +2010,18 @@ void updateClampPosition() {
 // 2431 for psx, 2437 for MD
 // in this mode, sampling clock is free to choose
 void passThroughWithIfModeSwitch() {
-  SerialM.print("pass-through ");
+  //SerialM.print("pass-through ");
   if (rto->outModePassThroughWithIf == 0) { // then enable pass-through mode
-    SerialM.println("on");
+    //SerialM.println("on");
     // first load default presets
-    if (rto->videoStandardInput == 2 || rto->videoStandardInput == 4) {
-      writeProgramArrayNew(pal_240p);
-      doPostPresetLoadSteps();
-    }
-    else {
+//    if (rto->videoStandardInput == 2 || rto->videoStandardInput == 4) {
+//      writeProgramArrayNew(pal_240p);
+//      doPostPresetLoadSteps();
+//    }
+//    else {
       writeProgramArrayNew(ntsc_240p);
       doPostPresetLoadSteps();
-    }
+//    }
     rto->autoBestHtotalEnabled = false; // disable while in this mode (need to set this after initial preset loading)
     GBS::PAD_SYNC_OUT_ENZ::write(1); // no sync out yet
     GBS::RESET_CONTROL_0x46::write(0); // 0_46 all off first, VDS + IF enabled later
@@ -2105,7 +2105,7 @@ void passThroughWithIfModeSwitch() {
     delay(100);
   }
   else { // switch back
-    SerialM.println("off");
+    //SerialM.println("off");
     rto->autoBestHtotalEnabled = true; // enable again
     rto->outModePassThroughWithIf = 0;
     applyPresets(getVideoMode());
@@ -2364,13 +2364,13 @@ void setup() {
   //Serial.setDebugOutput(true); // if you want simple wifi debug info
   // file system (web page, custom presets, ect)
   if (!SPIFFS.begin()) {
-    SerialM.println("SPIFFS Mount Failed");
+    //SerialM.println("SPIFFS Mount Failed");
   }
   else {
     // load userprefs.txt
     File f = SPIFFS.open("/userprefs.txt", "r");
     if (!f) {
-      SerialM.println("userprefs open failed");
+      //SerialM.println("userprefs open failed");
       uopt->presetPreference = 0;
       uopt->enableFrameTimeLock = 0;
       uopt->presetGroup = 0;
@@ -2378,28 +2378,28 @@ void setup() {
       saveUserPrefs(); // if this fails, there must be a spiffs problem
     }
     else {
-      SerialM.println("userprefs open ok");
+      //SerialM.println("userprefs open ok");
       //on a fresh / spiffs not formatted yet MCU:
       //userprefs.txt open ok //result[0] = 207 //result[1] = 207
       char result[4];
       result[0] = f.read(); result[0] -= '0'; // file streams with their chars..
       uopt->presetPreference = (uint8_t)result[0];
-      SerialM.print("presetPreference = "); SerialM.println(uopt->presetPreference);
+      //SerialM.print("presetPreference = "); //SerialM.println(uopt->presetPreference);
       if (uopt->presetPreference > 4) uopt->presetPreference = 0; // fresh spiffs ?
 
       result[1] = f.read(); result[1] -= '0';
       uopt->enableFrameTimeLock = (uint8_t)result[1]; // Frame Time Lock
-      SerialM.print("FrameTime Lock = "); SerialM.println(uopt->enableFrameTimeLock);
+      //SerialM.print("FrameTime Lock = "); //SerialM.println(uopt->enableFrameTimeLock);
       if (uopt->enableFrameTimeLock > 1) uopt->enableFrameTimeLock = 0; // fresh spiffs ?
 
       result[2] = f.read(); result[2] -= '0';
       uopt->presetGroup = (uint8_t)result[2];
-      SerialM.print("presetGroup = "); SerialM.println(uopt->presetGroup); // custom preset group
+      //SerialM.print("presetGroup = "); //SerialM.println(uopt->presetGroup); // custom preset group
       if (uopt->presetGroup > 4) uopt->presetGroup = 0;
 
       result[3] = f.read(); result[3] -= '0';
       uopt->frameTimeLockMethod = (uint8_t)result[3];
-      SerialM.print("frameTimeLockMethod = "); SerialM.println(uopt->frameTimeLockMethod);
+      //SerialM.print("frameTimeLockMethod = "); //SerialM.println(uopt->frameTimeLockMethod);
       if (uopt->frameTimeLockMethod > 1) uopt->frameTimeLockMethod = 0;
 
       f.close();
@@ -2417,7 +2417,7 @@ void setup() {
       static uint8_t result = 0;
       static boolean printDone = 0;
       if (!printDone) {
-        SerialM.print("i2c: ");
+        //SerialM.print("i2c: ");
         printDone = 1;
       }
       pinMode(SCL, INPUT); pinMode(SDA, INPUT);
@@ -2432,7 +2432,7 @@ void setup() {
       writeOneByte(0xf0, 0); readFromRegister(0x0c, 1, &result);
       Serial.print(result, HEX);
     }
-    SerialM.print("\n");
+    //SerialM.print("\n");
   }
 
   zeroAll();
@@ -2550,15 +2550,15 @@ void loop() {
       for (int segment = 0; segment <= 5; segment++) {
         dumpRegisters(segment);
       }
-      SerialM.println("};");
+//      //SerialM.println("};");
       break;
     case '+':
-      SerialM.println("hor. +");
+//      //SerialM.println("hor. +");
       shiftHorizontalRight();
       //shiftHorizontalRightIF(4);
       break;
     case '-':
-      SerialM.println("hor. -");
+//      //SerialM.println("hor. -");
       shiftHorizontalLeft();
       //shiftHorizontalLeftIF(4);
       break;
@@ -2569,11 +2569,11 @@ void loop() {
       shiftVerticalDownIF();
       break;
     case 'z':
-      SerialM.println("scale+");
+//      //SerialM.println("scale+");
       scaleHorizontalLarger();
       break;
     case 'h':
-      SerialM.println("scale-");
+//      //SerialM.println("scale-");
       scaleHorizontalSmaller();
       break;
     case 'q':
@@ -2616,7 +2616,7 @@ void loop() {
       }
       break;
     case 'C':
-      SerialM.println("PLL: ICLK");
+//      //SerialM.println("PLL: ICLK");
       //GBS::PLL_MS::write(0); // not required anymore
       //GBS::MEM_ADR_DLY_REG::write(0x03); GBS::MEM_CLK_DLY_REG::write(0x03); // memory subtimings
       GBS::PLLAD_FS::write(1); // gain high
@@ -2635,10 +2635,10 @@ void loop() {
       writeProgramArrayNew(ntsc_1280x720);
       doPostPresetLoadSteps();
       break;
-    case 'y':
-      writeProgramArrayNew(pal_1280x720);
-      doPostPresetLoadSteps();
-      break;
+//    case 'y':
+//      writeProgramArrayNew(pal_1280x720);
+//      doPostPresetLoadSteps();
+//      break;
     case 'P':
       //
       break;
@@ -2653,27 +2653,27 @@ void loop() {
       passThroughWithIfModeSwitch();
       break;
     case 'T':
-      SerialM.print("auto gain ");
+//      //SerialM.print("auto gain ");
       if (uopt->enableAutoGain == 0) {
         uopt->enableAutoGain = 1;
         GBS::ADC_RGCTRL::write(0x3c);
         GBS::ADC_GGCTRL::write(0x3c);
         GBS::ADC_BGCTRL::write(0x3c);
-        SerialM.println("on");
+        //SerialM.println("on");
       }
       else {
         uopt->enableAutoGain = 0;
-        SerialM.println("off");
+        //SerialM.println("off");
       }
       break;
     case 'e':
       writeProgramArrayNew(ntsc_240p);
       doPostPresetLoadSteps();
       break;
-    case 'r':
-      writeProgramArrayNew(pal_240p);
-      doPostPresetLoadSteps();
-      break;
+//    case 'r':
+//      writeProgramArrayNew(pal_240p);
+//      doPostPresetLoadSteps();
+//      break;
     case '.':
       // timings recalculation with new bestHtotal
       FrameSync::reset();
@@ -2685,13 +2685,13 @@ void loop() {
       break;
     case 'v':
       rto->phaseSP += 1; rto->phaseSP &= 0x1f;
-      SerialM.print("SP: "); SerialM.println(rto->phaseSP);
+//      //SerialM.print("SP: "); //SerialM.println(rto->phaseSP);
       setPhaseSP();
       //setPhaseADC();
       break;
     case 'b':
       advancePhase(); latchPLLAD();
-      SerialM.print("ADC: "); SerialM.println(rto->phaseADC);
+//      //SerialM.print("ADC: "); //SerialM.println(rto->phaseADC);
       break;
     case 'n':
     {
@@ -2711,7 +2711,7 @@ void loop() {
         //
         //            line_length = line_length / ((rto->currentSyncProcessorMode > 0 ? 1 : 2)); // half of pll_divider, but in linedouble mode only
 
-        SerialM.print("PLL div: "); SerialM.println(pll_divider, HEX);
+        //SerialM.print("PLL div: "); //SerialM.println(pll_divider, HEX);
 
         // regular output modes: apply IF corrections
         if (GBS::VDS_HSYNC_RST::read() != 0xfff) {
@@ -2732,7 +2732,7 @@ void loop() {
     {
       uint16_t VDS_HSYNC_RST = GBS::VDS_HSYNC_RST::read();
       GBS::VDS_HSYNC_RST::write(VDS_HSYNC_RST + 1);
-      SerialM.print("HTotal++: "); SerialM.println(VDS_HSYNC_RST + 1);
+      //SerialM.print("HTotal++: "); //SerialM.println(VDS_HSYNC_RST + 1);
     }
     break;
     case 'A':
@@ -2743,14 +2743,14 @@ void loop() {
       zeroAll();
       break;
     case 'm':
-      SerialM.print("syncwatcher ");
+//      //SerialM.print("syncwatcher ");
       if (rto->syncWatcherEnabled == true) {
         rto->syncWatcherEnabled = false;
-        SerialM.println("off");
+        //SerialM.println("off");
       }
       else {
         rto->syncWatcherEnabled = true;
-        SerialM.println("on");
+        //SerialM.println("on");
       }
       break;
     case ',':
@@ -2763,18 +2763,18 @@ void loop() {
       break;
 #if defined(ESP8266)
     case 'c':
-      SerialM.println("OTA Updates on");
+      //SerialM.println("OTA Updates on");
       initUpdateOTA();
       rto->allowUpdatesOTA = true;
       break;
     case 'G':
-      SerialM.print("Debug Pings ");
+      //SerialM.print("Debug Pings ");
       if (!rto->enableDebugPings) {
-        SerialM.println("on");
+        //SerialM.println("on");
         rto->enableDebugPings = 1;
       }
       else {
-        SerialM.println("off");
+        //SerialM.println("off");
         rto->enableDebugPings = 0;
       }
       break;
@@ -2783,32 +2783,32 @@ void loop() {
       ResetSDRAM();
       break;
     case 'f':
-      SerialM.print("peaking ");
+//      //SerialM.print("peaking ");
       if (GBS::VDS_PK_Y_H_BYPS::read() == 1) {
         GBS::VDS_PK_Y_H_BYPS::write(0);
-        SerialM.println("on");
+        //SerialM.println("on");
       }
       else {
         GBS::VDS_PK_Y_H_BYPS::write(1);
-        SerialM.println("off");
+        //SerialM.println("off");
       }
       break;
     case 'F':
-      SerialM.print("ADC filter ");
+//      //SerialM.print("ADC filter ");
       if (GBS::ADC_FLTR::read() > 0) {
         GBS::ADC_FLTR::write(0);
-        SerialM.println("off");
+        //SerialM.println("off");
       }
       else {
         GBS::ADC_FLTR::write(3);
-        SerialM.println("on");
+        //SerialM.println("on");
       }
       break;
     case 'L':
       //
       break;
     case 'l':
-      SerialM.println("spOffOn");
+//      //SerialM.println("spOffOn");
       SyncProcessorOffOn();
       break;
     case 'W':
@@ -2823,10 +2823,10 @@ void loop() {
     case '1':
       moveHS(1, false);
       break;
-    case '2':
-      writeProgramArrayNew(pal_feedbackclock); // ModeLine "720x576@50" 27 720 732 795 864 576 581 586 625 -hsync -vsync
-      doPostPresetLoadSteps();
-      break;
+//    case '2':
+//      writeProgramArrayNew(pal_feedbackclock); // ModeLine "720x576@50" 27 720 732 795 864 576 581 586 625 -hsync -vsync
+//      doPostPresetLoadSteps();
+//      break;
     case '3':
       //
       break;
@@ -2843,7 +2843,7 @@ void loop() {
       GBS::IF_HBIN_SP::write(GBS::IF_HBIN_SP::read() + 4); // canvas move right
       break;
     case '8':
-      //SerialM.println("invert sync");
+      ////SerialM.println("invert sync");
       invertHS(); invertVS();
       break;
     case '9':
@@ -2854,7 +2854,7 @@ void loop() {
     {
       switch (GBS::PLLAD_CKOS::read()) {
       case 0:
-        SerialM.println("OSR 1x"); // oversampling ratio
+        //SerialM.println("OSR 1x"); // oversampling ratio
         GBS::ADC_CLK_ICLK2X::write(0);
         GBS::ADC_CLK_ICLK1X::write(0);
         GBS::PLLAD_KS::write(2); // 0 - 3
@@ -2863,7 +2863,7 @@ void loop() {
         GBS::DEC2_BYPS::write(1);
         break;
       case 1:
-        SerialM.println("OSR 4x");
+        //SerialM.println("OSR 4x");
         GBS::ADC_CLK_ICLK2X::write(1);
         GBS::ADC_CLK_ICLK1X::write(1);
         GBS::PLLAD_KS::write(2); // 0 - 3
@@ -2872,7 +2872,7 @@ void loop() {
         GBS::DEC2_BYPS::write(0);
         break;
       case 2:
-        SerialM.println("OSR 2x");
+        //SerialM.println("OSR 2x");
         GBS::ADC_CLK_ICLK2X::write(0);
         GBS::ADC_CLK_ICLK1X::write(1);
         GBS::PLLAD_KS::write(2); // 0 - 3
@@ -2896,23 +2896,23 @@ void loop() {
       if (inputStage > 0) {
         if (inputStage == 1) {
           segment = Serial.parseInt();
-          SerialM.print("G");
-          SerialM.print(segment);
+          //SerialM.print("G");
+          //SerialM.print(segment);
         }
         else if (inputStage == 2) {
           char szNumbers[3];
           szNumbers[0] = Serial.read(); szNumbers[1] = Serial.read(); szNumbers[2] = '\0';
           //char * pEnd;
           inputRegister = strtol(szNumbers, NULL, 16);
-          SerialM.print("R0x");
-          SerialM.print(inputRegister, HEX);
+          //SerialM.print("R0x");
+          //SerialM.print(inputRegister, HEX);
           if (segment <= 5) {
             writeOneByte(0xF0, segment);
             readFromRegister(inputRegister, 1, &readout);
-            SerialM.print(" value: 0x"); SerialM.println(readout, HEX);
+            //SerialM.print(" value: 0x"); //SerialM.println(readout, HEX);
           }
           else {
-            SerialM.println("abort");
+            //SerialM.println("abort");
           }
           inputStage = 0;
         }
@@ -2925,16 +2925,16 @@ void loop() {
       if (inputStage > 0) {
         if (inputStage == 1) {
           segment = Serial.parseInt();
-          SerialM.print("S");
-          SerialM.print(segment);
+//          //SerialM.print("S");
+//          //SerialM.print(segment);
         }
         else if (inputStage == 2) {
           char szNumbers[3];
           szNumbers[0] = Serial.read(); szNumbers[1] = Serial.read(); szNumbers[2] = '\0';
           //char * pEnd;
           inputRegister = strtol(szNumbers, NULL, 16);
-          SerialM.print("R0x");
-          SerialM.print(inputRegister, HEX);
+//          //SerialM.print("R0x");
+//          //SerialM.print(inputRegister, HEX);
         }
         else if (inputStage == 3) {
           char szNumbers[3];
@@ -2944,14 +2944,14 @@ void loop() {
           if (segment <= 5) {
             writeOneByte(0xF0, segment);
             readFromRegister(inputRegister, 1, &readout);
-            SerialM.print(" (was 0x"); SerialM.print(readout, HEX); SerialM.print(")");
+//            //SerialM.print(" (was 0x"); //SerialM.print(readout, HEX); //SerialM.print(")");
             writeOneByte(inputRegister, inputToogleBit);
             readFromRegister(inputRegister, 1, &readout);
-            SerialM.print(" is now: 0x"); SerialM.println(readout, HEX);
+//            //SerialM.print(" is now: 0x"); //SerialM.println(readout, HEX);
           }
-          else {
-            SerialM.println("abort");
-          }
+//          else {
+//            //SerialM.println("abort");
+//          }
           inputStage = 0;
         }
       }
@@ -2963,31 +2963,31 @@ void loop() {
       if (inputStage > 0) {
         if (inputStage == 1) {
           segment = Serial.parseInt();
-          SerialM.print("T");
-          SerialM.print(segment);
+//          //SerialM.print("T");
+//          //SerialM.print(segment);
         }
         else if (inputStage == 2) {
           char szNumbers[3];
           szNumbers[0] = Serial.read(); szNumbers[1] = Serial.read(); szNumbers[2] = '\0';
           //char * pEnd;
           inputRegister = strtol(szNumbers, NULL, 16);
-          SerialM.print("R0x");
-          SerialM.print(inputRegister, HEX);
+//          //SerialM.print("R0x");
+//          //SerialM.print(inputRegister, HEX);
         }
         else if (inputStage == 3) {
           inputToogleBit = Serial.parseInt();
-          SerialM.print(" Bit: "); SerialM.print(inputToogleBit);
+//          //SerialM.print(" Bit: "); //SerialM.print(inputToogleBit);
           inputStage = 0;
           if ((segment <= 5) && (inputToogleBit <= 7)) {
             writeOneByte(0xF0, segment);
             readFromRegister(inputRegister, 1, &readout);
-            SerialM.print(" (was 0x"); SerialM.print(readout, HEX); SerialM.print(")");
+//            //SerialM.print(" (was 0x"); //SerialM.print(readout, HEX); //SerialM.print(")");
             writeOneByte(inputRegister, readout ^ (1 << inputToogleBit));
             readFromRegister(inputRegister, 1, &readout);
-            SerialM.print(" is now: 0x"); SerialM.println(readout, HEX);
+//            //SerialM.print(" is now: 0x"); //SerialM.println(readout, HEX);
           }
           else {
-            SerialM.println("abort");
+//            //SerialM.println("abort");
           }
         }
       }
@@ -2999,13 +2999,13 @@ void loop() {
       String what = Serial.readStringUntil(' ');
 
       if (what.length() > 5) {
-        SerialM.println("abort");
+//        //SerialM.println("abort");
         inputStage = 0;
         break;
       }
       value = Serial.parseInt();
       if (value < 4096) {
-        SerialM.print("set "); SerialM.print(what); SerialM.print(" "); SerialM.println(value);
+//        //SerialM.print("set "); //SerialM.print(what); //SerialM.print(" "); //SerialM.println(value);
         if (what.equals("ht")) {
           set_htotal(value);
         }
@@ -3052,20 +3052,20 @@ void loop() {
           setAndUpdateSogLevel(value);
         }
       }
-      else {
-        SerialM.println("abort");
-      }
+//      else {
+//        //SerialM.println("abort");
+//      }
     }
     break;
     case 'x':
     {
       uint16_t if_hblank_scale_stop = GBS::IF_HBIN_SP::read();
       GBS::IF_HBIN_SP::write(if_hblank_scale_stop + 1);
-      SerialM.print("1_26: "); SerialM.println(if_hblank_scale_stop + 1);
+//      //SerialM.print("1_26: "); //SerialM.println(if_hblank_scale_stop + 1);
     }
     break;
     default:
-      SerialM.println("error");
+//      //SerialM.println("error");
       inputStage = 0;
       uint8_t temp = 0xff;
       while (Serial.available() && temp > 0) {
@@ -3143,7 +3143,7 @@ void loop() {
 #endif
       ;
 
-    SerialM.println(output);
+//    //SerialM.println(output);
   } // end information mode
 
   // syncwatcher polls SP status. when necessary, initiates adjustments or preset changes
@@ -3160,16 +3160,16 @@ void loop() {
       if (rto->videoStandardInput != 15) {
         LEDOFF; // always LEDOFF on sync loss, except if RGBHV
         disableDeinterlacer(); // engage free run for VDS ("coasting"), helps displays keep sync
-        if (rto->printInfos == false) {
-          if (noSyncCounter == 1) {
-            SerialM.print(".");
-          }
-        }
+//        if (rto->printInfos == false) {
+//          if (noSyncCounter == 1) {
+//            SerialM.print(".");
+//          }
+//        }
       }
       if (noSyncCounter % 20 == 0) {
         enableDeinterlacer(); // briefly show image
       }
-      if (noSyncCounter == 10) { SerialM.println("!"); }
+      if (noSyncCounter == 10) { /* SerialM.println("!"); */}
     }
     else {
       LEDON;
@@ -3191,7 +3191,7 @@ void loop() {
         }
       }
       if (signalInputChangeCounter >= 8) { // video mode has changed
-        SerialM.println("New Input");
+//        //SerialM.println("New Input");
         uint8_t timeout = 255;
         while (newVideoMode == 0 && --timeout > 0) {
           newVideoMode = getVideoMode();
@@ -3219,7 +3219,7 @@ void loop() {
           delay(20); // only a brief delay
         }
         else {
-          SerialM.println(" .. lost");
+//          //SerialM.println(" .. lost");
         }
         noSyncCounter = 0;
       }
@@ -3275,9 +3275,9 @@ void loop() {
         delay(10);
         //setPhaseSP(); setPhaseADC();
         togglePhaseAdjustUnits();
-        SerialM.print("> "); SerialM.print(GBS::PLLAD_MD::read());
-        SerialM.print(": "); SerialM.print(GBS::PLLAD_ICP::read());
-        SerialM.print(":"); SerialM.println(GBS::PLLAD_FS::read());
+//        SerialM.print("> "); SerialM.print(GBS::PLLAD_MD::read());
+//        SerialM.print(": "); SerialM.print(GBS::PLLAD_ICP::read());
+//        SerialM.print(":"); SerialM.println(GBS::PLLAD_FS::read());
         delay(200);
       }
       noSyncCounter += 1; // speed this up when source is off
@@ -3289,25 +3289,25 @@ void loop() {
           GBS::SP_NO_CLAMP_REG::write(1); // unlock clamp
           rto->coastPositionIsSet = false;
           rto->clampPositionIsSet = false;
-          SerialM.println("unlock clamp");
+//          SerialM.println("unlock clamp");
           delay(10);
         }
         if ((noSyncCounter % 120) == 0) {
           //optimizeSogLevel();  // todo: optimize optimizeSogLevel()
           setAndUpdateSogLevel(rto->currentLevelSOG / 2);
-          SerialM.print("SOG: "); SerialM.println(rto->currentLevelSOG);
+//          //SerialM.print("SOG: "); //SerialM.println(rto->currentLevelSOG);
         }
         if (noSyncCounter % 40 == 0) {
           static boolean toggle = 0;
           if (toggle) {
             toggle = 0;
-            SerialM.print("HD? ");
+//            //SerialM.print("HD? ");
             GBS::SP_PRE_COAST::write(0x06);
             GBS::SP_POST_COAST::write(0x07);
           }
           else {
             toggle = 1;
-            SerialM.print("SD? ");
+//            //SerialM.print("SD? ");
             GBS::SP_PRE_COAST::write(6); // SP test: 9
             GBS::SP_POST_COAST::write(16); // SP test: 9
           }
@@ -3350,7 +3350,7 @@ void loop() {
     else if (rto->syncLockFailIgnore-- == 0) {
       // frame time lock failed, most likely due to missing wires
       rto->autoBestHtotalEnabled = false;
-      SerialM.println("lock failed, check debug wire!");
+//      SerialM.println("lock failed, check debug wire!");
     }
     GBS::TEST_BUS_SP_SEL::write(debugRegSPBackup);
 
@@ -3378,7 +3378,7 @@ void loop() {
     if (rto->applyPresetDoneStage == 1 && rto->continousStableCounter <= 4) {
       resetModeDetect();
       delay(300);
-      SerialM.println("reset MD");
+//      SerialM.println("reset MD");
       rto->applyPresetDoneStage = 2;
     }
     else if ((rto->applyPresetDoneStage == 1 && rto->continousStableCounter > 4)) {
@@ -3391,7 +3391,7 @@ void loop() {
       if (GBS::ADC_0X00_RESERVED_5::read() != 1 && GBS::IF_AUTO_OFST_RESERVED_2::read() != 1) {
         if (rto->videoStandardInput == 1) { // only 480i for now (PAL seems to be fine without)
           rto->sourceVLines = GBS::STATUS_SYNC_PROC_VTOTAL::read();
-          SerialM.print("vlines: "); SerialM.println(rto->sourceVLines);
+//          SerialM.print("vlines: "); SerialM.println(rto->sourceVLines);
           if (rto->sourceVLines > 263 && rto->sourceVLines <= 274)
           {
             GBS::IF_VB_SP::write(GBS::IF_VB_SP::read() + 16);
@@ -3497,16 +3497,16 @@ void handleType2Command() {
       break;
     case '3':  // load custom preset
     {
-      if (rto->videoStandardInput == 0) SerialM.println("no input detected, aborting action");
-      else {
+//      if (rto->videoStandardInput == 0) //SerialM.println("no input detected, aborting action");
+//      else {
         const uint8_t* preset = loadPresetFromSPIFFS(rto->videoStandardInput); // load for current video mode
         writeProgramArrayNew(preset);
         doPostPresetLoadSteps();
-      }
+//      }
     }
     break;
     case '4':
-      if (rto->videoStandardInput == 0) SerialM.println("no input detected, aborting action");
+//      if (rto->videoStandardInput == 0) //SerialM.println("no input detected, aborting action");
       else savePresetToSPIFFS();
       break;
     case '5':
@@ -3555,7 +3555,7 @@ void handleType2Command() {
       break;
     case 'a':
       // restart ESP MCU (due to an SDK bug, this does not work reliably after programming. It needs a power cycle or reset button push first.)
-      SerialM.print("Attempting to restart MCU. If it hangs, reset manually!"); SerialM.println("\n");
+//      //SerialM.print("Attempting to restart MCU. If it hangs, reset manually!"); //SerialM.println("\n");
       ESP.restart();
       break;
     case 'b':
@@ -3587,24 +3587,24 @@ void handleType2Command() {
     {
       Dir dir = SPIFFS.openDir("/");
       while (dir.next()) {
-        SerialM.print(dir.fileName()); SerialM.print(" "); SerialM.println(dir.fileSize());
+//        //SerialM.print(dir.fileName()); //SerialM.print(" "); //SerialM.println(dir.fileSize());
         delay(1); // wifi stack
       }
       ////
       File f = SPIFFS.open("/userprefs.txt", "r");
       if (!f) {
-        SerialM.println("userprefs open failed");
+        //SerialM.println("userprefs open failed");
       }
       else {
         char result[4];
         result[0] = f.read(); result[0] -= '0'; // file streams with their chars..
-        SerialM.print("presetPreference = "); SerialM.println((uint8_t)result[0]);
+        //SerialM.print("presetPreference = "); //SerialM.println((uint8_t)result[0]);
         result[1] = f.read(); result[1] -= '0';
-        SerialM.print("FrameTime Lock = "); SerialM.println((uint8_t)result[1]);
+        //SerialM.print("FrameTime Lock = "); //SerialM.println((uint8_t)result[1]);
         result[2] = f.read(); result[2] -= '0';
-        SerialM.print("presetGroup = "); SerialM.println((uint8_t)result[2]);
+        //SerialM.print("presetGroup = "); //SerialM.println((uint8_t)result[2]);
         result[3] = f.read(); result[3] -= '0';
-        SerialM.print("frameTimeLockMethod = "); SerialM.println((uint8_t)result[3]);
+        //SerialM.print("frameTimeLockMethod = "); //SerialM.println((uint8_t)result[3]);
         f.close();
       }
     }
@@ -3683,10 +3683,10 @@ void handleType2Command() {
       GBS::PLL_MS::write(PLL_MS);
       ResetSDRAM();
       if (memClock != 10) {
-        SerialM.print("SDRAM clock: "); SerialM.print(memClock); SerialM.println("Mhz");
+        //SerialM.print("SDRAM clock: "); //SerialM.print(memClock); //SerialM.println("Mhz");
       }
       else {
-        SerialM.print("SDRAM clock: "); SerialM.println("Feedback clock (default)");
+        //SerialM.print("SDRAM clock: "); //SerialM.println("Feedback clock (default)");
       }
     }
     break;
@@ -3699,7 +3699,7 @@ void handleType2Command() {
           GBS::VDS_TAP6_BYPS::write(0); // no good way to store this change for later reversal
           GBS::VDS_0X2A_RESERVED_2BITS::write(1); // so use this trick to detect it later
           }*/
-        SerialM.println("DCTI on");
+        //SerialM.println("DCTI on");
       }
       else {
         GBS::VDS_UV_STEP_BYPS::write(1);
@@ -3707,22 +3707,22 @@ void handleType2Command() {
           GBS::VDS_TAP6_BYPS::write(1);
           GBS::VDS_0X2A_RESERVED_2BITS::write(0);
           }*/
-        SerialM.println("DCTI off");
+        //SerialM.println("DCTI off");
       }
       break;
     case 'n':
-      SerialM.print("ADC gain++ : ");
+      //SerialM.print("ADC gain++ : ");
       GBS::ADC_RGCTRL::write(GBS::ADC_RGCTRL::read() - 1);
       GBS::ADC_GGCTRL::write(GBS::ADC_GGCTRL::read() - 1);
       GBS::ADC_BGCTRL::write(GBS::ADC_BGCTRL::read() - 1);
-      SerialM.println(GBS::ADC_RGCTRL::read(), HEX);
+      //SerialM.println(GBS::ADC_RGCTRL::read(), HEX);
       break;
     case 'o':
-      SerialM.print("ADC gain-- : ");
+      //SerialM.print("ADC gain-- : ");
       GBS::ADC_RGCTRL::write(GBS::ADC_RGCTRL::read() + 1);
       GBS::ADC_GGCTRL::write(GBS::ADC_GGCTRL::read() + 1);
       GBS::ADC_BGCTRL::write(GBS::ADC_BGCTRL::read() + 1);
-      SerialM.println(GBS::ADC_RGCTRL::read(), HEX);
+      //SerialM.println(GBS::ADC_RGCTRL::read(), HEX);
       break;
     case 'A':
       GBS::VDS_DIS_HB_ST::write(GBS::VDS_DIS_HB_ST::read() - 4);
@@ -3752,13 +3752,13 @@ void startWebserver()
   persWM.setApCredentials(ap_ssid, ap_password);
   persWM.onConnect([]() {
     WiFi.hostname("gbscontrol");
-    SerialM.print("local IP: ");
-    SerialM.println(WiFi.localIP());
-    SerialM.print("hostname: "); SerialM.println(WiFi.hostname());
+    //SerialM.print("local IP: ");
+    //SerialM.println(WiFi.localIP());
+    //SerialM.print("hostname: "); //SerialM.println(WiFi.hostname());
   });
   persWM.onAp([]() {
     WiFi.hostname("gbscontrol");
-    SerialM.print("AP MODE: "); SerialM.println("connect to wifi network called gbscontrol with password qqqqqqqq");
+    //SerialM.print("AP MODE: "); //SerialM.println("connect to wifi network called gbscontrol with password qqqqqqqq");
   });
 
   server.on("/", handleRoot);
@@ -3776,7 +3776,7 @@ void startWebserver()
   {
     if (response.ReceivedResponse)
     {
-      SerialM.printf(
+      //SerialM.printf(
         "Reply from %s: time=%lums TTL=%d\n",
         response.DestIPAddress.toString().c_str(),
         response.ResponseTime,
@@ -3784,7 +3784,7 @@ void startWebserver()
     }
     else
     {
-      SerialM.printf("Request timed out.\n");
+      //SerialM.printf("Request timed out.\n");
     }
 
     // Return true to continue the ping sequence.
@@ -3817,21 +3817,21 @@ void initUpdateOTA() {
 
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     SPIFFS.end();
-    SerialM.println("Start updating " + type);
+    //SerialM.println("Start updating " + type);
   });
   ArduinoOTA.onEnd([]() {
-    SerialM.println("\nEnd");
+    //SerialM.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    SerialM.printf("Progress: %u%%\r", (progress / (total / 100)));
+    //SerialM.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    SerialM.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) SerialM.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) SerialM.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) SerialM.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) SerialM.println("Receive Failed");
-    else if (error == OTA_END_ERROR) SerialM.println("End Failed");
+    //SerialM.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) //SerialM.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) //SerialM.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) //SerialM.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) //SerialM.println("Receive Failed");
+    else if (error == OTA_END_ERROR) //SerialM.println("End Failed");
   });
   ArduinoOTA.begin();
 }
@@ -3852,7 +3852,7 @@ const uint8_t* loadPresetFromSPIFFS(byte forVideoMode) {
 
   f = SPIFFS.open("/userprefs.txt", "r");
   if (f) {
-    SerialM.println("userprefs.txt opened");
+    //SerialM.println("userprefs.txt opened");
     char result[3];
     result[0] = f.read(); // todo: move file cursor manually
     result[1] = f.read();
@@ -3860,27 +3860,28 @@ const uint8_t* loadPresetFromSPIFFS(byte forVideoMode) {
 
     f.close();
     if ((uint8_t)(result[2] - '0') < 10) group = result[2]; // otherwise not stored on spiffs
-    SerialM.print("loading from presetGroup "); SerialM.println((uint8_t)(group - '0')); // custom preset group (console)
+    //SerialM.print("loading from presetGroup "); //SerialM.println((uint8_t)(group - '0')); // custom preset group (console)
   }
   else {
     // file not found, we don't know what preset to load
-    SerialM.println("please select a preset group first!");
-    if (forVideoMode == 2 || forVideoMode == 4) return pal_240p;
-    else return ntsc_240p;
+    //SerialM.println("please select a preset group first!");
+//    if (forVideoMode == 2 || forVideoMode == 4) return pal_240p;
+//    else 
+    return ntsc_240p;
   }
 
   if (forVideoMode == 1) {
     f = SPIFFS.open("/preset_ntsc." + String(group), "r");
   }
-  else if (forVideoMode == 2) {
-    f = SPIFFS.open("/preset_pal." + String(group), "r");
-  }
+//  else if (forVideoMode == 2) {
+//    f = SPIFFS.open("/preset_pal." + String(group), "r");
+//  }
   else if (forVideoMode == 3) {
     f = SPIFFS.open("/preset_ntsc_480p." + String(group), "r");
   }
-  else if (forVideoMode == 4) {
-    f = SPIFFS.open("/preset_pal_576p." + String(group), "r");
-  }
+//  else if (forVideoMode == 4) {
+//    f = SPIFFS.open("/preset_pal_576p." + String(group), "r");
+//  }
   else if (forVideoMode == 5) {
     f = SPIFFS.open("/preset_ntsc_720p." + String(group), "r");
   }
@@ -3889,13 +3890,14 @@ const uint8_t* loadPresetFromSPIFFS(byte forVideoMode) {
   }
 
   if (!f) {
-    SerialM.println("open preset file failed");
-    if (forVideoMode == 2 || forVideoMode == 4) return pal_240p;
-    else return ntsc_240p;
+    //SerialM.println("open preset file failed");
+//    if (forVideoMode == 2 || forVideoMode == 4) return pal_240p;
+//    else 
+    return ntsc_240p;
   }
   else {
-    SerialM.println("preset file open ok: ");
-    SerialM.println(f.name());
+    //SerialM.println("preset file open ok: ");
+    //SerialM.println(f.name());
     s = f.readStringUntil('}');
     f.close();
   }
@@ -3927,26 +3929,26 @@ void savePresetToSPIFFS() {
 
     f.close();
     group = result[2];
-    SerialM.print("saving to presetGroup "); SerialM.println(result[2]); // custom preset group (console)
+    //SerialM.print("saving to presetGroup "); //SerialM.println(result[2]); // custom preset group (console)
   }
   else {
     // file not found, we don't know where to save this preset
-    SerialM.println("please select a preset group first!");
+    //SerialM.println("please select a preset group first!");
     return;
   }
 
   if (rto->videoStandardInput == 1) {
     f = SPIFFS.open("/preset_ntsc." + String(group), "w");
   }
-  else if (rto->videoStandardInput == 2) {
-    f = SPIFFS.open("/preset_pal." + String(group), "w");
-  }
+//  else if (rto->videoStandardInput == 2) {
+//    f = SPIFFS.open("/preset_pal." + String(group), "w");
+//  }
   else if (rto->videoStandardInput == 3) {
     f = SPIFFS.open("/preset_ntsc_480p." + String(group), "w");
   }
-  else if (rto->videoStandardInput == 4) {
-    f = SPIFFS.open("/preset_pal_576p." + String(group), "w");
-  }
+//  else if (rto->videoStandardInput == 4) {
+//    f = SPIFFS.open("/preset_pal_576p." + String(group), "w");
+//  }
   else if (rto->videoStandardInput == 5) {
     f = SPIFFS.open("/preset_ntsc_720p." + String(group), "w");
   }
@@ -3955,10 +3957,10 @@ void savePresetToSPIFFS() {
   }
 
   if (!f) {
-    SerialM.println("open preset file failed");
+    //SerialM.println("open preset file failed");
   }
   else {
-    SerialM.println("preset file open ok");
+    //SerialM.println("preset file open ok");
 
     GBS::ADC_0X00_RESERVED_5::write(1); // use one reserved bit to mark this as a custom preset
     // don't undo vertical IF shift, since this is by default a customized preset
@@ -4014,8 +4016,8 @@ void savePresetToSPIFFS() {
       }
     }
     f.println("};");
-    SerialM.print("preset saved as: ");
-    SerialM.println(f.name());
+    //SerialM.print("preset saved as: ");
+    //SerialM.println(f.name());
     f.close();
   }
 }
@@ -4023,31 +4025,31 @@ void savePresetToSPIFFS() {
 void saveUserPrefs() {
   File f = SPIFFS.open("/userprefs.txt", "w");
   if (!f) {
-    SerialM.println("saving preferences failed");
+    //SerialM.println("saving preferences failed");
     return;
   }
   f.write(uopt->presetPreference + '0');
   f.write(uopt->enableFrameTimeLock + '0');
   f.write(uopt->presetGroup + '0');
   f.write(uopt->frameTimeLockMethod + '0');
-  SerialM.println("userprefs saved: ");
+  //SerialM.println("userprefs saved: ");
   f.close();
 
   // print results
   f = SPIFFS.open("/userprefs.txt", "r");
   if (!f) {
-    SerialM.println("userprefs open failed");
+    //SerialM.println("userprefs open failed");
   }
   else {
     char result[4];
     result[0] = f.read(); result[0] -= '0'; // file streams with their chars..
-    SerialM.print("  presetPreference = "); SerialM.println((uint8_t)result[0]);
+    //SerialM.print("  presetPreference = "); //SerialM.println((uint8_t)result[0]);
     result[1] = f.read(); result[1] -= '0';
-    SerialM.print("  FrameTime Lock = "); SerialM.println((uint8_t)result[1]);
+    //SerialM.print("  FrameTime Lock = "); //SerialM.println((uint8_t)result[1]);
     result[2] = f.read(); result[2] -= '0';
-    SerialM.print("  presetGroup = "); SerialM.println((uint8_t)result[2]);
+    //SerialM.print("  presetGroup = "); //SerialM.println((uint8_t)result[2]);
     result[3] = f.read(); result[3] -= '0';
-    SerialM.print("  frameTimeLockMethod = "); SerialM.println((uint8_t)result[3]);
+    //SerialM.print("  frameTimeLockMethod = "); //SerialM.println((uint8_t)result[3]);
     f.close();
   }
 }
