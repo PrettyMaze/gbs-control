@@ -2775,7 +2775,7 @@ void loop() {
       //optimizeSogLevel();
       //optimizePhaseSP();
       applyBestHTotal(GBS::VDS_HSYNC_RST::read() - 1);
-      SerialM.print("HTotal--: "); SerialM.println(GBS::VDS_HSYNC_RST::read());
+//      SerialM.print("HTotal--: "); SerialM.println(GBS::VDS_HSYNC_RST::read());
       break;
     case 'M':
       zeroAll();
