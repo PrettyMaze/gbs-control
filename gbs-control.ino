@@ -104,16 +104,16 @@ struct FrameSyncAttrs {
 };
 typedef FrameSyncManager<GBS, FrameSyncAttrs> FrameSync;
 
-struct MenuAttrs {
-  static const int8_t shiftDelta = 4;
-  static const int8_t scaleDelta = 4;
-  static const int16_t vertShiftRange = 300;
-  static const int16_t horizShiftRange = 400;
-  static const int16_t vertScaleRange = 100;
-  static const int16_t horizScaleRange = 130;
-  static const int16_t barLength = 100;
-};
-typedef MenuManager<GBS, MenuAttrs> Menu;
+//struct MenuAttrs {
+//  static const int8_t shiftDelta = 4;
+//  static const int8_t scaleDelta = 4;
+//  static const int16_t vertShiftRange = 300;
+//  static const int16_t horizShiftRange = 400;
+//  static const int16_t vertScaleRange = 100;
+//  static const int16_t horizScaleRange = 130;
+//  static const int16_t barLength = 100;
+//};
+//typedef MenuManager<GBS, MenuAttrs> Menu;
 
 // runTimeOptions holds system variables
 struct runTimeOptions {
@@ -1659,7 +1659,7 @@ void doPostPresetLoadSteps() {
   resetDigital();
 
   rto->autoBestHtotalEnabled = true; // will re-detect whether debug wire is present
-  Menu::init();
+//  Menu::init();
   enableDebugPort();
 
   GBS::PAD_SYNC_OUT_ENZ::write(1); // delay sync output
@@ -1889,9 +1889,9 @@ static uint8_t getVideoMode() {
   // note: if stat0 == 0x07, it's supposedly stable. if we then can't find a mode, it must be an MD problem
   if ((detectedMode & 0x80) == 0x80) { // bit 7: SD flag (480i, 480P, 576i, 576P)
     if ((detectedMode & 0x08) == 0x08) return 1; // ntsc interlace
-    if ((detectedMode & 0x20) == 0x20) return 2; // pal interlace
+//    if ((detectedMode & 0x20) == 0x20) return 2; // pal interlace
     if ((detectedMode & 0x10) == 0x10) return 3; // edtv 60 progressive
-    if ((detectedMode & 0x40) == 0x40) return 4; // edtv 50 progressive
+//    if ((detectedMode & 0x40) == 0x40) return 4; // edtv 50 progressive
   }
 
   //detectedMode = GBS::STATUS_05::read(); // doesn't work
@@ -2479,9 +2479,9 @@ void setup() {
   }
 #endif
 
-  Serial.begin(115200); // set Arduino IDE Serial Monitor to the same 115200 bauds!
-  Serial.setTimeout(10);
-  Serial.println("starting");
+//  Serial.begin(115200); // set Arduino IDE Serial Monitor to the same 115200 bauds!
+//  Serial.setTimeout(10);
+//  Serial.println("starting");
   // user options // todo: could be stored in Arduino EEPROM. Other MCUs have SPIFFS
   uopt->presetPreference = 0; // normal, 720p, fb, custom, 1280x1024
   uopt->presetGroup = 0; //
@@ -2516,7 +2516,7 @@ void setup() {
   rto->coastPositionIsSet = 0;
   rto->continousStableCounter = 0;
 
-  globalCommand = 0; // web server uses this to issue commands
+//  globalCommand = 0; // web server uses this to issue commands
 
   pinMode(DEBUG_IN_PIN, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -2601,7 +2601,7 @@ void setup() {
         writeOneByte(0xf0, 0); readFromRegister(0x0c, 1, &result);
 //        SerialM.print(result, HEX);
         // also keep web ui stuff going
-        handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
+//        handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
         counter++;
       }
       else {
@@ -2691,22 +2691,22 @@ void handleButtons(void) {
 }
 #endif
 
-void handleWiFi() {
-#if defined(ESP8266)
-  if (rto->webServerEnabled && rto->webServerStarted) {
-    persWM.handleWiFi(); // if connected, returns instantly. otherwise it reconnects or opens AP
-    dnsServer.processNextRequest();
-    server.handleClient();
-    webSocket.loop();
-    // if there's a control command from the server, globalCommand will now hold it.
-    // process it in the parser, then reset to 0 at the end of the sketch.
-  }
-
-  if (rto->allowUpdatesOTA) {
-    ArduinoOTA.handle();
-  }
-#endif
-}
+//void handleWiFi() {
+//#if defined(ESP8266)
+//  if (rto->webServerEnabled && rto->webServerStarted) {
+//    persWM.handleWiFi(); // if connected, returns instantly. otherwise it reconnects or opens AP
+//    dnsServer.processNextRequest();
+//    server.handleClient();
+//    webSocket.loop();
+//    // if there's a control command from the server, globalCommand will now hold it.
+//    // process it in the parser, then reset to 0 at the end of the sketch.
+//  }
+//
+//  if (rto->allowUpdatesOTA) {
+//    ArduinoOTA.handle();
+//  }
+//#endif
+//}
 
 void loop() {
   static uint8_t readout = 0;
@@ -2723,7 +2723,7 @@ void loop() {
   static unsigned long lastButton = micros();
 #endif
 
-  handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
+//  handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
 
 #ifdef HAVE_BUTTONS
   if (micros() - lastButton > buttonPollInterval) {
@@ -2885,12 +2885,12 @@ void loop() {
     break;
     case 'J':
       rto->optimizeSOG = !rto->optimizeSOG;
-      SerialM.print("optimizeSOG ");
+//      SerialM.print("optimizeSOG ");
       if (rto->optimizeSOG) {
-        SerialM.println("on");
+//        SerialM.println("on");
       }
       else {
-        SerialM.println("off");
+//        SerialM.println("off");
       }
       break;
     case 'v':
@@ -3369,7 +3369,7 @@ void loop() {
   } // end information mode
 
   // test
-  handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
+//  handleWiFi(); // ESP8266 check, WiFi + OTA updates, checks for server enabled + started
 
   // syncwatcher polls SP status. when necessary, initiates adjustments or preset changes
   if (rto->sourceDisconnected == false && rto->syncWatcherEnabled == true 
@@ -3381,11 +3381,11 @@ void loop() {
       rto->continousStableCounter = 0;
       LEDOFF; // always LEDOFF on sync loss, except if RGBHV
       disableDeinterlacer(); // engage free run for VDS ("coasting"), helps displays keep sync
-      if (rto->printInfos == false) {
-        if (noSyncCounter == 1) {
+//      if (rto->printInfos == false) {
+//        if (noSyncCounter == 1) {
 //          SerialM.print(".");
-        }
-      }
+//        }
+//      }
       if (noSyncCounter % 40 == 0) {
         enableDeinterlacer(); // briefly show image
         rto->clampPositionIsSet = false;
@@ -3440,9 +3440,9 @@ void loop() {
           rto->videoStandardInput = newVideoMode;
           delay(20); // only a brief delay
         }
-        else {
+//        else {
 //          //SerialM.println(" .. lost");
-        }
+//        }
         noSyncCounter = 0;
       }
     }
@@ -3464,9 +3464,9 @@ void loop() {
         LEDOFF;
         RGBHVNoSyncCounter++;
         rto->continousStableCounter = 0;
-        if (RGBHVNoSyncCounter % 20 == 0) {
+//        if (RGBHVNoSyncCounter % 20 == 0) {
 //          SerialM.print("!");
-        }
+//        }
       }
       else {
         RGBHVNoSyncCounter = 0;
@@ -3782,7 +3782,7 @@ void handleType2Command() {
     case '6':
       //Frame Time Lock OFF
       uopt->enableFrameTimeLock = 0;
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case '7':
     {
@@ -3816,7 +3816,7 @@ void handleType2Command() {
     break;
     case '9':
       uopt->presetPreference = 3; // prefer 720p preset
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'a':
       // restart ESP MCU (due to an SDK bug, this does not work reliably after programming. 
@@ -3827,27 +3827,27 @@ void handleType2Command() {
     case 'b':
       uopt->presetGroup = 0;
       uopt->presetPreference = 2; // custom
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'c':
       uopt->presetGroup = 1;
       uopt->presetPreference = 2;
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'd':
       uopt->presetGroup = 2;
       uopt->presetPreference = 2;
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'j':
       uopt->presetGroup = 3;
       uopt->presetPreference = 2;
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'k':
       uopt->presetGroup = 4;
       uopt->presetPreference = 2;
-      saveUserPrefs();
+//      saveUserPrefs();
       break;
     case 'e': // print files on spiffs
     {
