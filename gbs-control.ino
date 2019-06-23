@@ -1203,7 +1203,8 @@ void shiftVerticalDown() {
 
 void shiftVerticalUpIF() {
   // -4 to allow variance in source line count
-  uint8_t offset = rto->videoStandardInput == 2 ? 4 : 1;
+//  uint8_t offset = rto->videoStandardInput == 2 ? 4 : 1;
+  uint8_t offset = 1;
   uint16_t sourceLines = GBS::VPERIOD_IF::read() - offset;
   int16_t stop = GBS::IF_VB_SP::read();
   int16_t start = GBS::IF_VB_ST::read();
@@ -1217,7 +1218,8 @@ void shiftVerticalUpIF() {
 }
 
 void shiftVerticalDownIF() {
-  uint8_t offset = rto->videoStandardInput == 2 ? 4 : 1;
+//  uint8_t offset = rto->videoStandardInput == 2 ? 4 : 1;
+  uint8_t offset = 1;
   uint16_t sourceLines = GBS::VPERIOD_IF::read() - offset;
   int16_t stop = GBS::IF_VB_SP::read();
   int16_t start = GBS::IF_VB_ST::read();
@@ -1520,33 +1522,33 @@ void doPostPresetLoadSteps() {
       // display hor. blanking
       //setDisplayHblankStopPosition(480);
     }
-    else if (rto->videoStandardInput == 4) { // ED YUV 50
-      // p-scan pal, need to either double adc data rate and halve vds scaling
-      // or disable line doubler (better)
-      GBS::PLLAD_KS::write(1); // 5_16
-      GBS::VDS_VSCALE::write(683);
-      GBS::VDS_HSCALE::write(548);
-      GBS::VDS_V_DELAY::write(1); // filter 3_24 2 on
-      GBS::VDS_TAP6_BYPS::write(1); // 3_24 3 disable filter (jailbars)
-      GBS::MADPT_Y_DELAY::write(1); // some shift
-      GBS::IF_HS_TAP11_BYPS::write(0); // 1_02 4 enable filter
-      GBS::IF_PRGRSV_CNTRL::write(1); // 1_00 6
-      GBS::IF_HS_DEC_FACTOR::write(0); // 1_0b 4+5
-      GBS::IF_LD_SEL_PROV::write(1); // 1_0b 7
-      GBS::IF_LD_RAM_BYPS::write(1); // no LD 1_0c 0
-      // vertical shift
-      GBS::IF_VB_ST::write(605);
-      GBS::IF_VB_SP::write(606);
-      // horizontal shift
-      GBS::IF_HB_SP2::write(0x78);
-      GBS::IF_HB_ST2::write(0x20); // check!
-      GBS::IF_HBIN_SP::write(0x6a);
-      // display blanking
-      setDisplayVblankStopPosition(42);
-      setDisplayVblankStartPosition(934);
-      setMemoryVblankStartPosition(10);
-      setMemoryVblankStopPosition(12);
-    }
+//    else if (rto->videoStandardInput == 4) { // ED YUV 50
+//      // p-scan pal, need to either double adc data rate and halve vds scaling
+//      // or disable line doubler (better)
+//      GBS::PLLAD_KS::write(1); // 5_16
+//      GBS::VDS_VSCALE::write(683);
+//      GBS::VDS_HSCALE::write(548);
+//      GBS::VDS_V_DELAY::write(1); // filter 3_24 2 on
+//      GBS::VDS_TAP6_BYPS::write(1); // 3_24 3 disable filter (jailbars)
+//      GBS::MADPT_Y_DELAY::write(1); // some shift
+//      GBS::IF_HS_TAP11_BYPS::write(0); // 1_02 4 enable filter
+//      GBS::IF_PRGRSV_CNTRL::write(1); // 1_00 6
+//      GBS::IF_HS_DEC_FACTOR::write(0); // 1_0b 4+5
+//      GBS::IF_LD_SEL_PROV::write(1); // 1_0b 7
+//      GBS::IF_LD_RAM_BYPS::write(1); // no LD 1_0c 0
+//      // vertical shift
+//      GBS::IF_VB_ST::write(605);
+//      GBS::IF_VB_SP::write(606);
+//      // horizontal shift
+//      GBS::IF_HB_SP2::write(0x78);
+//      GBS::IF_HB_ST2::write(0x20); // check!
+//      GBS::IF_HBIN_SP::write(0x6a);
+//      // display blanking
+//      setDisplayVblankStopPosition(42);
+//      setDisplayVblankStartPosition(934);
+//      setMemoryVblankStartPosition(10);
+//      setMemoryVblankStopPosition(12);
+//    }
     else if (rto->videoStandardInput == 5) { // 720p
       GBS::SP_HD_MODE::write(1); // tri level sync
       GBS::ADC_CLK_ICLK2X::write(0);
@@ -2036,10 +2038,10 @@ void updateClampPosition() {
       start = inHlength * 0.008f;
       stop = inHlength * 0.0168f;
     }
-    else if (rto->videoStandardInput == 4) {
-      start = inHlength * 0.018f;
-      stop = inHlength * 0.030f;
-    }
+//    else if (rto->videoStandardInput == 4) {
+//      start = inHlength * 0.018f;
+//      stop = inHlength * 0.030f;
+//    }
     else if (rto->videoStandardInput == 5) { // HD / tri level sync
       start = inHlength * 0.0232f;
       stop = inHlength * 0.04f; // 720p
